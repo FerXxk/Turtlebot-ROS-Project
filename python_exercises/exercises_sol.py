@@ -297,3 +297,5 @@ def plot_functions():
 plot_functions()
 
 
+
+# %%
