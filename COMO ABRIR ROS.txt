@@ -2,7 +2,7 @@ COMO ABRIR ROS
 cd C:\Users\ferna\Desktop\Carrera4\lab
 run_container_windows.bat
 
-abrir xlaunch
+abrir xming
 
 Desde un segundo terminal:
 docker exec -it lab_rob_container bash
