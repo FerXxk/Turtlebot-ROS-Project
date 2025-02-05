@@ -2,6 +2,20 @@
 
 In this repository, students will find the required files to complete the course on mobile robotics. The autonomous navigation folder consists on a simulation of the Turtlebot 3 in some maps, so we have designed a controller for the robot to move along a path while avoiding obstacles.
 
+__INSTRUCTIONS OF USE__
+- To run the _autonomous_navigation_ package you have to execute the next command:
+
+`roslaunch autonomous_navigation challenge_reactive.launch `
+
+- To run the _challenge_evaluation_ package you have to execute the next two commands in different terminals:
+
+`roslaunch challenge_evaluation robotics_challenge_reactive.launch `
+
+`roslaunch challenge_evaluation evaluation_reactive.launch `
+
+
+
+__PROCESS OF THE CODE__
 The challenge of reactive navigation has been completed succesfully following this steps:
 
 1) At first, we subscribed the phython script to the topic _move_base_simple/goal_ to detect the objective that we wanted in Rviz. Next, we also subscribed to _/scan_ to detect the surroundings of the robot. The first aproach to the movement controller was to calculate the distance and the angle from the robot to the objective. This was posible by transforming the global coordinates of the goal to the local reference of the Turtlebot. We made the robot move in proportion to this values, with an angular and linear velocity. Then we added some lines of code to avoid the columns of the map. 
