@@ -21,5 +21,8 @@ The challenge of reactive navigation has been completed succesfully following th
 
 6) The final results are two different controllers for each simulation, both named _robot_controller.py_. The only major difference between them is the way that they obtain the points of the path as they are subscribed to different publishers and the points sent don´t have the same format. In this controllers the changes and improvements in the code are explained detailedly with their respective comments.
 
+[Ver el video](https://youtu.be/jFht1mxALfw?si=3ZEd0vtjA_qR-vGd)
+
+
 Authors: 
 Fernando Román Hidalgo, José Chaqués Torres
