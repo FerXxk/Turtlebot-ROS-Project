@@ -16,6 +16,7 @@ __INSTRUCTIONS OF USE__
 
 
 __PROCESS OF THE CODE__
+
 The challenge of reactive navigation has been completed succesfully following this steps:
 
 1) At first, we subscribed the phython script to the topic _move_base_simple/goal_ to detect the objective that we wanted in Rviz. Next, we also subscribed to _/scan_ to detect the surroundings of the robot. The first aproach to the movement controller was to calculate the distance and the angle from the robot to the objective. This was posible by transforming the global coordinates of the goal to the local reference of the Turtlebot. We made the robot move in proportion to this values, with an angular and linear velocity. Then we added some lines of code to avoid the columns of the map. 
