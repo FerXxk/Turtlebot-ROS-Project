@@ -17,11 +17,13 @@ The challenge of reactive navigation has been completed succesfully following th
 | ![Imagen 3](media/foto3.png) | ![Imagen 4](media/foto4.png) |
 
 
-5) Then we tested our controller in the challenge_evaluation simulation. The larger walls proved the controller of the robot to be very inefficient. To improve the controller, we added a condition when detecting an obstacle. This condition consists in the robot looking to both sides of the obstacle when it is detected, surrounding it by the side that was closer to it. This change improved the navigation time and avoided all collisions. 
+5) Then we tested our controller in the _challenge_evaluation_ simulation. The larger walls proved the controller of the robot to be very inefficient. To improve the controller, we added a condition when detecting an obstacle. This condition consists in the robot looking to both sides of the obstacle when it is detected, surrounding it by the side that was closer to it. This change improved the navigation time and avoided all collisions. 
 
-6) The final results are two different controllers for each simulation, both named _robot_controller.py_. The only major difference between them is the way that they obtain the points of the path as they are subscribed to different publishers and the points sent don´t have the same format. In this controllers the changes and improvements in the code are explained detailedly with their respective comments.
+6) The final results are two different controllers for each simulation, both named _robot_controller.py_. The only major difference between them is the way that they obtain the points of the path as they are subscribed to different publishers and the points sent don´t have the same format. In this controllers the changes and improvements in the code are explained detailedly with their respective comments. 
 
-[Ver el video](https://youtu.be/jFht1mxALfw?si=3ZEd0vtjA_qR-vGd)
+The final challenge can be seen in the next video:
+
+[Turtlebot 3 Challenge Evaluation](https://youtu.be/jFht1mxALfw?si=3ZEd0vtjA_qR-vGd)
 
 
 Authors: 
