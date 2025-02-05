@@ -1,10 +1,10 @@
 # Laboratorio de Robótica (4º GIERM)
 
-In this repository, students will find the required files to complete the course on mobile robotics.
+In this repository, students will find the required files to complete the course on mobile robotics. The autonomous navigation folder consists on a simulation of the Turtlebot 3 in some maps, and we have designed a controller for the robot to move along a path while avoiding obstacles.
 
 The challenge of reactive navigation has been completed succesfully following this steps:
 
-1) At first, we subscribed the phython script to movebase/goal to detect the objective that we wanted in Rviz. Next, we also subscribed to LaserScan to detect the surroundings of the robot. The first aproach to the movement controller was to calculate the distance and the angle from the robot to the objective. We made the robot move in proportion to this values, with an angular and linear velocity.Then we added some lines of code to avoid the columns of the map. 
+1) At first, we subscribed the phython script to movebase/goal to detect the objective that we wanted in Rviz. Next, we also subscribed to LaserScan to detect the surroundings of the robot. The first aproach to the movement controller was to calculate the distance and the angle from the robot to the objective. This was posible by the transform of the coordinates of the goal to the local reference of the Turtlebot. We made the robot move in proportion to this values, with an angular and linear velocity.Then we added some lines of code to avoid the columns of the map. 
 
 2) The first thing we noticed was that when the robot detected an obstacle it entered in a loop, because the range of the LiDAR it was looking was 360º. This made that when an obstacle was detected, it tried to rotate until the obstacle wasn't there. But instead of this the obstacle remained at the same distance, so it never stopped.
 
@@ -14,5 +14,7 @@ The challenge of reactive navigation has been completed succesfully following th
 
 5) Then we tested our controller in the challenge_evaluation simulation. The larger walls made the robot be very inefficient when avoiding them. To improve the controller, we added a condition when detecting an obstacle. This condition consists in the robot looking to both sides of the obstacle when it is detected, and surround it by the shorter side. This change improved the navigation time and avoided all collisions. 
 
-Authors: Fernando Román Hidalgo
-         José Chaqués Torres
+6) The final results are two different controllers for each simulation, named ...... In this controllers the changes and improvements in the code are explained detailedly with their respective comments.
+
+Authors: 
+Fernando Román Hidalgo, José Chaqués Torres
