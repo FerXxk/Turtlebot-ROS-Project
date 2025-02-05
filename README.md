@@ -10,7 +10,12 @@ The challenge of reactive navigation has been completed succesfully following th
 
 3) To fix this issue, we limited the range of the LiDAR to an angle of 90º looking to the front of the robot. After this change, the robot avoided the columns as it was required. The next step was to move along the path. 
 
-4) We subscribed to the path that was published by _path_publisher.py_. Then we set the first coordinates of the path as the goal of the robot, and the same process as before was done, avoiding obstacles until reaching the goal. When the robot reaches it, the goal is updated with the next coordinates of the path. This happens until the path has no more points.
+4) We subscribed to the path that was published by _path_publisher.py_. Then we set the first coordinates of the path as the goal of the robot, and the same process as before was done, avoiding obstacles until reaching the goal. When the robot reaches it, the goal is updated with the next coordinates of the path. This happens until the path has no more points. The results can be seen in this sequence:
+
+![Secuencia 1](media/foto1.png)
+![Secuencia 2](media/foto2.png)
+![Secuencia 3](media/foto3.png)
+![Secuencia 4](media/foto4.png)
 
 5) Then we tested our controller in the challenge_evaluation simulation. The larger walls proved the controller of the robot to be very inefficient. To improve the controller, we added a condition when detecting an obstacle. This condition consists in the robot looking to both sides of the obstacle when it is detected, surrounding it by the side that was closer to it. This change improved the navigation time and avoided all collisions. 
 

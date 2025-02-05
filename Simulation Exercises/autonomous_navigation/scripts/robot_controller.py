@@ -83,20 +83,20 @@ class TurtlebotController():
             return
         
         longitud=len(self.scan_data.ranges)
-        self.min_dist_izq=100000
+        self.min_dist_izq=100000 # Default values to update
         self.min_dist_der=100000
         self.min_dist_cen=100000
 
         for i in range(longitud):
-            if i<=35:
+            if i<=35:   # We limit the FOV of the LiDAR to 90º
                 if(self.min_dist_izq>self.scan_data.ranges[i]):
-                    self.min_dist_izq=self.scan_data.ranges[i]
+                    self.min_dist_izq=self.scan_data.ranges[i] # If the distance is minor, we update it.
 
                 if(self.min_dist_cen>self.scan_data.ranges[i]):
                     self.min_dist_cen=self.scan_data.ranges[i]
 
             if i>=325:
-                if(self.min_dist_der>self.scan_data.ranges[i]):
+                if(self.min_dist_der>self.scan_data.ranges[i]): # We update the distances in three directions
                     self.min_dist_der=self.scan_data.ranges[i]
 
                 if(self.min_dist_cen>self.scan_data.ranges[i]):
@@ -106,37 +106,37 @@ class TurtlebotController():
         self.goal_transformada=PoseStamped()
         
         self.goal.header.stamp=rospy.Time()
-        self.goal_transformada=self.tf_listener.transformPose('base_footprint',self.goal) 
+        self.goal_transformada=self.tf_listener.transformPose('base_footprint',self.goal)  # We transform the global goal to the local reference of the robot
 
 
         goal_x = self.goal_transformada.pose.position.x
         goal_y = self.goal_transformada.pose.position.y
         
-        distance_to_goal = math.sqrt(goal_x**2 + goal_y**2)
-        angle_to_goal = math.atan2(goal_y, goal_x)
+        distance_to_goal = math.sqrt(goal_x**2 + goal_y**2) # We calculate the distance from the robot to the goal
+        angle_to_goal = math.atan2(goal_y, goal_x) # We calculate the angle from the robot to the goal
 
 
-        if(self.min_dist_cen<0.3):
-            linear=0.0
+        if(self.min_dist_cen<0.3): # If the obstacle is too close:
+            linear=0.0 # it stops going forward
             if(self.permanencia==True):
                 self.permanencia=False
-                if(self.min_dist_izq>self.min_dist_der):
+                if(self.min_dist_izq>self.min_dist_der):  # The robot rotates in the opposite direction of the obstacle 
                     angular=self.max_ang_vel
                     self.angular_ant=angular
                 else:
                     angular=-self.max_ang_vel
                     self.angular_ant=angular
             else:
-                angular=self.angular_ant
+                angular=self.angular_ant # If both directions are equally close to the obstacle, it rotates arbitrarily
 
 
         else:
-            self.permanencia=True
-            linear = min(self.max_lin_vel, distance_to_goal) 
-            angular = max(-self.max_ang_vel, min(self.max_ang_vel, angle_to_goal))
+            self.permanencia=True # If there isn't any obstacle close the robot goes forward and turning to the goal at the same time
+            linear = min(self.max_lin_vel, distance_to_goal)  # We saturate the speed
+            angular = max(-self.max_ang_vel, min(self.max_ang_vel, angle_to_goal)) # We saturate the angle
 
 
-                    
+        # Some messages to keep the user informated 
         rospy.loginfo("Min range: %.2f",self.min_dist_cen)
         rospy.loginfo("Angulo a objetivo: %.2f",angle_to_goal)
         rospy.loginfo("Coordenadas locales  x:%.2f y:%.2f",self.goal_transformada.pose.position.x,self.goal_transformada.pose.position.y)
@@ -163,7 +163,7 @@ class TurtlebotController():
                 return False
 
             goal_distance = math.sqrt(pose_transformed.pose.position.x ** 2 + pose_transformed.pose.position.y ** 2)
-            if(goal_distance < self.goal_tol):
+            if(goal_distance < self.goal_tol): # When the robot is closely enough to the goal, it is considered reached
                 self.goal_reached=True
             if self.i >= len(self.trayectoria):  
                 return True
