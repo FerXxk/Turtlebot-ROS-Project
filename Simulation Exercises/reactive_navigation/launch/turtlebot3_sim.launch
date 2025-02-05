@@ -1,0 +1,33 @@
+
+<launch>
+
+    <arg name="world_name" default="turtlebot3_stage_2" />
+    <arg name="x_pos" default="0.0"/> 
+    <arg name="y_pos" default="0.0"/>
+    <arg name="z_pos" default="0"/>   
+    
+    <!-- Launch Gazebo world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/$(arg world_name).world" />
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>  
+    
+    <!-- Nodes to publish additional static robot camera TF to the TF tree -->
+	<node pkg="tf2_ros" type="static_transform_publisher" name="camera_tf" args="0.04 0 0.11 0 0 0  camera_dummy_link camera_link" />
+    
+    <!-- It loads a 3D robot description from an URDF file --> 
+    <param name="robot_description" command="$(find xacro)/xacro $(find turtlebot3_description)/urdf/turtlebot3_burger_for_autorace_2020.urdf.xacro" />
+
+    <!-- Node to publish the robot TF tree. It uses the URDF specified by the parameter robot description -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub" />
+   
+    <!-- Node to read the URDF robot description and load the Turtlebot in the Gazebo simulation -->
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" args="-urdf -model autorace -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+
+</launch>
+
+

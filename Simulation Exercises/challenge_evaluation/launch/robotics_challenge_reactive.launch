@@ -1,0 +1,34 @@
+
+<launch>
+
+    <!-- Robot initial position -->
+    <arg name="x_pos" default="-1.6"/>
+    <arg name="y_pos" default="2.0"/>
+    <arg name="z_pos" default="0.0"/>
+    <arg name="h_pos" default="0.0"/>
+
+    <!-- Launch Gazebo simulation -->
+    <!-- Initial position of the Turtlebot and scenario are given as parameters -->
+    <include file="$(find autonomous_navigation)/launch/turtlebot3_sim.launch">
+        <arg name="world_name" value="turtlebot3_stage_4" /> 
+        <arg name="x_pos" value="$(arg x_pos)"/> 
+        <arg name="y_pos" value="$(arg y_pos)"/> 
+        <arg name="z_pos" value="$(arg z_pos)"/>
+    </include>
+    
+    <!-- Launch RViz -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find challenge_evaluation)/config/robotics_challenge_reactive.rviz"/>
+       
+	<!-- Launch the reactive robot controller from autonomous_navigation package -->
+    <node name="robot_controller" pkg="challenge_evaluation" type="robot_controller.py" output="screen">
+    <!-- Parametrize the goal tolerance -->
+    <param name="goal_tolerance" value="0.15" />
+        
+    <!-- Set maximum velocities -->
+    <param name="max_linear_velocity" value="0.2" />
+    <param name="max_angular_velocity" value="0.5" />
+    </node>
+
+</launch>
+
+

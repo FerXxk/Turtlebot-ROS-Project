@@ -1,0 +1,40 @@
+
+<launch>
+
+    <!-- Robot initial position -->
+    <arg name="x_pos" default="-1.6"/>
+    <arg name="y_pos" default="2.0"/>
+    <arg name="z_pos" default="0.0"/>
+    <arg name="h_pos" default="0.0"/>
+
+    <!-- Launch Gazebo simulation -->
+    <!-- Initial position of the Turtlebot and scenario are given as parameters -->
+    <include file="$(find autonomous_navigation)/launch/turtlebot3_sim.launch">
+        <arg name="world_name" value="turtlebot3_stage_4" /> 
+        <arg name="x_pos" value="$(arg x_pos)"/> 
+        <arg name="y_pos" value="$(arg y_pos)"/> 
+        <arg name="z_pos" value="$(arg z_pos)"/>
+    </include>
+    
+    <!-- Launch RViz -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find challenge_evaluation)/config/robotics_challenge_planning.rviz"/>
+
+    <!-- Global costmap 2d for path planning-->
+    <node pkg="costmap_2d" type="costmap_2d_node" name="costmap_2d" output="screen">
+        <rosparam command="load" file="$(find autonomous_navigation)/config/global_costmap_params.yaml" />
+    </node>
+    
+    <!-- Launch localization -->
+    <include file="$(find autonomous_navigation)/launch/localization.launch">
+        <arg name="x_pos" value="$(arg x_pos)"/>
+        <arg name="y_pos" value="$(arg y_pos)"/>
+        <arg name="h_pos" value="$(arg h_pos)"/>
+        <arg name="map_file" value="$(find autonomous_navigation)/config/map.yaml"/>
+    </include>
+    
+	<!-- Launch the reactive robot controller and the path planner from autonomous_navigation package -->
+    <!-- TO BE COMPLETED -->
+	
+</launch>
+
+

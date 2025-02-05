@@ -1,0 +1,211 @@
+#!/usr/bin/python3
+# This Python file uses the following encoding: utf-8
+
+import math
+import rospy
+import tf
+from geometry_msgs.msg import Twist
+from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Path
+
+
+class TurtlebotController():
+    
+    def __init__(self, rate):
+        
+        # Read parameters
+        self.goal_tol = 0.15
+        self.max_lin_vel = rospy.get_param('~max_linear_velocity')
+        self.max_ang_vel = rospy.get_param('~max_angular_velocity')
+        self.trayectoria_received=False
+        self.rate = rate # Hz  (1/Hz = secs)
+        self.angular_ant=0.5
+        self.permanencia=True
+        # Initialize internal data 
+        self.goal = PoseStamped()
+        self.goal_received = False
+        self.goal_reached = True
+        self.i=0
+
+        # Subscribers / publishers
+        self.tf_listener = tf.TransformListener()
+
+        self.cmd_vel_pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
+        #rospy.Subscriber("move_base_simple/goal", PoseStamped, self.goalCallback)
+        rospy.Subscriber('path', Path,self.goalCallback) # We subscribe to the path node
+        rospy.Subscriber("/scan", LaserScan, self.scanCallback) # We subscribe to the LiDAR
+        rospy.loginfo("TurtlebotController started")
+        
+
+    def shutdown(self):
+        # Stop turtlebot
+        rospy.loginfo("Stop TurtleBot")
+        # A default Twist has linear.x of 0 and angular.z of 0.  So it'll stop TurtleBot
+        self.cmd_vel.publish(Twist())
+        # Sleep just makes sure TurtleBot receives the stop command prior to shutting down the script
+        rospy.sleep(1)
+
+    
+    def scanCallback(self,scan_data):
+        # Update the minimum obstacle distance
+        self.scan_data=scan_data
+
+
+    def goalCallback(self,trayectoria):
+        if(self.trayectoria_received==False):  # First the program receives the entire trajectory
+            self.trayectoria = trayectoria.poses  
+            self.i=0  
+            self.trayectoria_received=True # Now the trajectory is known, and it is saved in a vector
+            rospy.loginfo("Trayectoria recibida con %d puntos",len(self.trayectoria))
+
+        if(self.trayectoria_received==True and self.goal_reached==True and self.i<len(self.trayectoria)): # Until the last point of the trajectory:
+            self.goal=self.trayectoria[self.i] # The goal is the i point of the trajectory
+            self.goal_received=True # When the goal is reached, it is updated
+            self.goal_reached=False
+            self.i+=1 
+
+
+
+
+    def command(self):
+
+        # Check if we already received data
+        if(self.goal_received==False):
+            rospy.loginfo("Goal not received. Waiting...")
+            return
+
+        # Check if the final goal has been reached
+        if(self.goalReached()==True):
+            rospy.loginfo("GOAL REACHED!!! Stopping!")
+            self.publish(0.0, 0.0)
+            self.goal_received = False
+            return
+        
+        longitud=len(self.scan_data.ranges)
+        self.min_dist_izq=100000
+        self.min_dist_der=100000
+        self.min_dist_cen=100000
+
+        for i in range(longitud):
+            if i<=35:
+                if(self.min_dist_izq>self.scan_data.ranges[i]):
+                    self.min_dist_izq=self.scan_data.ranges[i]
+
+                if(self.min_dist_cen>self.scan_data.ranges[i]):
+                    self.min_dist_cen=self.scan_data.ranges[i]
+
+            if i>=325:
+                if(self.min_dist_der>self.scan_data.ranges[i]):
+                    self.min_dist_der=self.scan_data.ranges[i]
+
+                if(self.min_dist_cen>self.scan_data.ranges[i]):
+                    self.min_dist_cen=self.scan_data.ranges[i]
+
+        
+        self.goal_transformada=PoseStamped()
+        
+        self.goal.header.stamp=rospy.Time()
+        self.goal_transformada=self.tf_listener.transformPose('base_footprint',self.goal) 
+
+
+        goal_x = self.goal_transformada.pose.position.x
+        goal_y = self.goal_transformada.pose.position.y
+        
+        distance_to_goal = math.sqrt(goal_x**2 + goal_y**2)
+        angle_to_goal = math.atan2(goal_y, goal_x)
+
+
+        if(self.min_dist_cen<0.3):
+            linear=0.0
+            if(self.permanencia==True):
+                self.permanencia=False
+                if(self.min_dist_izq>self.min_dist_der):
+                    angular=self.max_ang_vel
+                    self.angular_ant=angular
+                else:
+                    angular=-self.max_ang_vel
+                    self.angular_ant=angular
+            else:
+                angular=self.angular_ant
+
+
+        else:
+            self.permanencia=True
+            linear = min(self.max_lin_vel, distance_to_goal) 
+            angular = max(-self.max_ang_vel, min(self.max_ang_vel, angle_to_goal))
+
+
+                    
+        rospy.loginfo("Min range: %.2f",self.min_dist_cen)
+        rospy.loginfo("Angulo a objetivo: %.2f",angle_to_goal)
+        rospy.loginfo("Coordenadas locales  x:%.2f y:%.2f",self.goal_transformada.pose.position.x,self.goal_transformada.pose.position.y)
+
+            
+        # Publish velocity command
+        self.publish(linear,angular)
+        return False
+
+
+    def goalReached(self):
+        # Return True if the FINAL goal was reached, False otherwise
+
+        if self.goal_received:
+            pose_transformed = PoseStamped()
+
+            # Update the goal timestamp to avoid issues with TF transform
+            self.goal.header.stamp = rospy.Time()
+
+            try:
+                pose_transformed = self.tf_listener.transformPose('base_footprint', self.goal)
+            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                rospy.loginfo("Problem TF")
+                return False
+
+            goal_distance = math.sqrt(pose_transformed.pose.position.x ** 2 + pose_transformed.pose.position.y ** 2)
+            if(goal_distance < self.goal_tol):
+                self.goal_reached=True
+            if self.i >= len(self.trayectoria):  
+                return True
+
+        return False
+
+    
+    def publish(self, lin_vel, ang_vel):
+        # Twist is a datatype for velocity
+        move_cmd = Twist()
+        # Copy the forward velocity
+        move_cmd.linear.x = lin_vel
+        # Copy the angular velocity
+        move_cmd.angular.z = ang_vel
+        rospy.loginfo("Commanding lv: %.2f, av: %.2f", lin_vel, ang_vel)
+        self.cmd_vel_pub.publish(move_cmd)
+
+
+
+
+if __name__ == '__main__':
+    
+    # Initiliaze
+    rospy.init_node('TurtlebotController', anonymous=False)
+
+    # Tell user how to stop TurtleBot
+    rospy.loginfo("To stop TurtleBot CTRL + C")
+
+    rate = 10 # Frecuency (Hz) for commanding the robot
+    robot = TurtlebotController(rate)
+        
+    # What function to call when you CTRL + C    
+    rospy.on_shutdown(robot.shutdown)
+        
+    # TurtleBot will stop if we don't keep telling it to move.  How often should we tell it to move? 10 HZ
+    r = rospy.Rate(rate)
+        
+    # As long as you haven't CTRL + C keeping doing...
+    while not (rospy.is_shutdown()):
+        
+	    # Publish the velocity
+        robot.command()
+
+        # Wait for 0.1 seconds (10 HZ) and publish again
+        r.sleep()    

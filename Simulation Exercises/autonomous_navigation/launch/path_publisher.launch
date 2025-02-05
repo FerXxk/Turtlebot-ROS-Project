@@ -1,0 +1,8 @@
+<launch>
+	<arg name="path_file" default="path"/>
+	<rosparam command="delete" param="path" />
+	<rosparam command="load" file="$(find autonomous_navigation)/config/$(arg path_file).yaml" />
+	<node pkg="autonomous_navigation" type="path_publisher.py" name="path_publisher" output="screen"/>
+</launch>
+
+

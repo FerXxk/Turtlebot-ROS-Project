@@ -1,0 +1,14 @@
+<launch>
+	<arg name="goals_file" default="navigation_goals"/>
+	<rosparam command="delete" param="/goals" />
+	<rosparam command="load" file="$(find challenge_evaluation)/config/$(arg goals_file).yaml" />
+	<node pkg="challenge_evaluation" type="evaluation.py" name="evaluation" output="screen">
+        <param name="output_file" value="$(find challenge_evaluation)/config/metrics_planning.txt" />
+        <param name="base_frame" value="base_footprint" />
+        <param name="global_frame" value="map" />
+        <param name="goal_tolerance" value="0.15" />
+        <param name="min_collision_dist" value="0.12" />
+    </node>
+</launch>
+
+
